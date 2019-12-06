@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <title>This is the title of the webpage!</title>
+  </head>
+    <style>
+      .hidden{
+        display: none;
+      }
+    </style>
+  <body>
+    <form id="todo-form">
+      <div id="todo-div">
+        <label for="todo-form">Create a To-Do item</label>
+        <input type="text" id="form-value" name="todo-form" value="">
+      <div>
+        <input type="submit" value="submit">
+      </div>
+    </form>
+    <div id="error" class="hidden">Something Went Wrong!</div>
+    <ul id="todos-list">
+      {% for d in data %}
+      <li>{{d.description}}</li>
+      {% endfor %}
+    </ul>
+    <script>
+      document.getElementById('todo-form').onsubmit = function(event){
+        event.preventDefault();
+        fetch('/todos/createtodo', {
+          method: 'POST',
+          body: JSON.stringify({
+            'description': document.getElementById('form-value').value
+          }),
+          headers:{
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(function(response){
+          return response.json();
+        })
+        .then(function(jsonResponse){
+          console.log(jsonResponse)
+          const liItem = document.createElement('li')
+          liItem.innerText = jsonResponse.description
+          document.getElementById('todos-list').appendChild(liItem)
+          document.getElementById('error').className = 'hidden'
+        })
+        .catch(function(){
+          document.getElementById("error").className = '';
+        })
+      }
+    </script>
+  </body>
+</html>
