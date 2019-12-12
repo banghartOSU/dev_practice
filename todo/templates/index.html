@@ -6,6 +6,11 @@
       .hidden{
         display: none;
       }
+      ul{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
     </style>
   <body>
     <form id="todo-form">
@@ -19,10 +24,40 @@
     <div id="error" class="hidden">Something Went Wrong!</div>
     <ul id="todos-list">
       {% for d in data %}
-      <li>{{d.description}}</li>
+      <li>
+        <input type="checkbox" class="check-completed" data-id="{{ d.id }}" {% if d.completed %}  checked {% endif %} /> {{d.description}} 
+      </li>
       {% endfor %}
     </ul>
+
     <script>
+      //Check box AJAX
+      const checkBoxes = document.querySelectorAll('.check-completed');
+      checkBoxes.forEach(box => {
+        box.onchange = function(e) {
+          //Log event for testing
+          console.log('event', e)
+          const completedCheck = e.target.checked
+          const todoId = e.target.dataset['id']
+          fetch('/todos/' + todoId + '/set-completed', {
+            method: 'POST',
+            body: JSON.stringify({
+              'completed': completedCheck
+            }),
+            headers:{
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(function(){
+            document.getElementById("error").className = 'hidden';
+          })
+          .catch(function(){
+            document.getElementById("error").className = '';
+          })
+        }
+      })
+
+      //Form submit AJAX (via fetch)
       document.getElementById('todo-form').onsubmit = function(event){
         event.preventDefault();
         fetch('/todos/createtodo', {
